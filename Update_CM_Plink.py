@@ -1,19 +1,28 @@
+ # %% [markdown]
+# ##### Import and config
+
+# %%
 import pandas as pd
 import os
 from sqlalchemy import create_engine
 import datetime as dt
 import time
+import dev.Update_CM as uc
 
-import Update_CM as uc
-
-days_to_get = 7
-plink = 'C:/PBI/Claro/data/extras/PLink/GENOPT/'
+days_to_get = 30
+plink = f'//172.29.200.10/npm/01. Relatorios Gerenciais/BI/PLink/'
 plink_file = '【NPOC】Task Table.csv'
 db_user = 'Juliano Correa'
 
-uc.__init__(db_user, days_to_get)
+# %%
+#uc.__init__(db_user, days_to_get)
 cm_form_open = uc.get_cm()
 
+
+# %% [markdown]
+# ##### Read Task Export
+
+# %%
 df_plink = pd.read_csv(plink + plink_file, parse_dates=True)
 #df_plink_rfsh = df_plink[df_plink['Task List'] == "RF Shaping"].copy()
 df_plink_rfsh = df_plink.copy()
@@ -26,6 +35,10 @@ df_plink_rfsh.columns = map(str.lower, df_plink_rfsh.columns)
 df_plink_rfsh_test = df_plink_rfsh
 df_plink_rfsh_test.head(2)
 
+# %% [markdown]
+# ##### Main
+
+# %%
 for row in df_plink_rfsh_test.itertuples():
     try:
         pl_tag = row.tag
@@ -80,8 +93,15 @@ for row in df_plink_rfsh_test.itertuples():
             uc.check_cell_task(pl_cell, pl_taskid, _data_plan, _data_term, _acao, pl_tasklist, pl_owner, pl_note, pl_tec, cm_form_open, db_user,pl_completed_or_not, _data_update)
             print(pl_node, pl_cell,  pl_note, pl_owner,  pl_taskid, pl_s_date[:10], pl_tec, pl_completed_or_not, pl_complete_time, pl_tasklist)
             print('--------------')
+        if pl_tasklist == 'Cell Power':
+            uc.check_cell_task(pl_cell, pl_taskid, _data_plan, _data_term, _acao, pl_tasklist, pl_owner, pl_note, pl_tec, cm_form_open, db_user,pl_completed_or_not, _data_update)
+            print(pl_node, pl_cell,  pl_note, pl_owner,  pl_taskid, pl_s_date[:10], pl_tec, pl_completed_or_not, pl_complete_time, pl_tasklist)
+            print('--------------')
         if pl_tasklist == 'Traffic Balance':
-            uc.check_node_task(pl_node, pl_taskid, _data_plan, _data_term, _acao, pl_tasklist, pl_owner, pl_note, pl_tec, cm_form_open, db_user,pl_completed_or_not, _data_update)
+            if pl_cell != '':
+                uc.check_cell_task(pl_cell, pl_taskid, _data_plan, _data_term, _acao, pl_tasklist, pl_owner, pl_note, pl_tec, cm_form_open, db_user,pl_completed_or_not, _data_update)
+            if pl_node != '':
+                uc.check_node_task(pl_node, pl_taskid, _data_plan, _data_term, _acao, pl_tasklist, pl_owner, pl_note, pl_tec, cm_form_open, db_user,pl_completed_or_not, _data_update)
             print(pl_node, pl_cell,  pl_note, pl_owner,  pl_taskid, pl_s_date[:10], pl_tec, pl_completed_or_not, pl_complete_time, pl_tasklist)
             print('--------------')
         if pl_tasklist == 'Logic Parameter':
@@ -93,3 +113,8 @@ for row in df_plink_rfsh_test.itertuples():
     
 
     #ULTIMO TESTADO
+
+# %%
+print('fim')
+
+
